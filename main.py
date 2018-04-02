@@ -1,14 +1,12 @@
-# from myPackage import ComponentSelection as CS
+from myPackage import modelSelection as ms
 from myPackage import tools as tl
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-import matplotlib.pyplot as plt
-from sklearn import model_selection
+import numpy as np
 from pandas import read_csv
 import argparse
-import pickle
+# import pickle
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
@@ -19,28 +17,61 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
 
     # Create results folder
-    tl.makeDir(args["results"])
+    results_folder = args["results"]
+    tl.makeDir(results_folder)
 
     # Configuration
     pca_threshold = 1.5
+    plot = True
+    max_estimators = 101
+    max_depth = 101
     seed = 10
-    models = []
-    models.append(('DTC', DecisionTreeClassifier(max_depth= None)))
-    models.append(('RFC', RandomForestClassifier(n_estimators= 50, n_jobs= -1)))
-    models.append(('GNB', GaussianNB()))
-    models.append(('BGG-DCT', BaggingClassifier(base_estimator= DecisionTreeClassifier(max_depth= None), n_estimators= 50, n_jobs= -1)))
-    models.append(('BGG-RFC', BaggingClassifier(base_estimator= RandomForestClassifier(n_estimators= 50, n_jobs= -1), n_estimators=50, n_jobs=-1)))
-    models.append(('BGG-GNB', BaggingClassifier(base_estimator= GaussianNB(), n_estimators= 50, n_jobs= -1)))
-    results= []
-    names = []
-
-    # depth = range(5, 101, 5)
+    models = {}
+    # models['DTC'] = DecisionTreeClassifier(max_depth=None)
+    # models['RFC'] = RandomForestClassifier(n_estimators=50, n_jobs=-1)
+    # models['GNB'] =  GaussianNB()
+    # models['BGG-DCT'] = BaggingClassifier(base_estimator=DecisionTreeClassifier(max_depth=None), n_estimators=50, n_jobs=-1)
+    # models['BGG-RFC'] = BaggingClassifier(base_estimator=RandomForestClassifier(n_estimators=50, n_jobs=-1), n_estimators=50, n_jobs=-1)
+    # models['BGG-GNB'] = BaggingClassifier(base_estimator=GaussianNB(), n_estimators=50, n_jobs=-1)
     # tuned_parameterds_DTC = [{'max_depth': depth, 'presort': [False, True]}]
     # scores = ['precision']
+    models['DTC'] = DecisionTreeClassifier()
+    models['RFC'] = RandomForestClassifier()
+    models['GNB'] = GaussianNB()
+    models['BGG-DCT'] = BaggingClassifier(base_estimator=DecisionTreeClassifier(), n_estimators=10,
+                                          n_jobs=-1)
+    models['BGG-RFC'] = BaggingClassifier(base_estimator=RandomForestClassifier(n_jobs=-1),
+                                          n_estimators=10, n_jobs=-1)
+    models['BGG-GNB'] = BaggingClassifier(base_estimator=GaussianNB(), n_estimators=10, n_jobs=-1)
+
     score = 'accuracy'
 
     tr_data = read_csv(args["data"], header= 0).values
     data, labels = tr_data[:,1:], tr_data[:, 0]
+    name=[]
+    for i in range(5):
+        model_name = ms.modelSelection(data, labels, models, seed, score, plot)
+        name.append(model_name)
+    print(name)
+    # models_conf = {}
+    # if model_name == 'DCT':
+    #     depth = np.arange(5, max_depth, 5)
+    #     # depth = np.append(depth, None)
+    #     tuned_parameters = [{'max_depth': depth, 'presort': [False, True]}]
+    #
+    # elif model_name == 'RFC':
+    #     estimators = np.arange(5,max_estimators,5)
+    #     tuned_parameters = [{'n_estimators': estimators}]
+    # elif model_name == 'GNB':
+    #     print("hhh")
+    # elif model_name == 'BGG-DCT':
+    #     depth = np.arange(5, max_depth, 5)
+    #     estimators = np.arange(5, max_estimators, 5)
+    #     tuned_parameters_DCT = [{'max_depth': depth, 'presort': [False, True]}]
+    #     tuned_parameters_BGG_DCT = [{'n_estimators': estimators}]
+    # elif model_name == 'BGG-GNB':
+    #     estimators = np.arange(5, max_estimators, 5)
+    #     tuned_parameters_BGG_DCT = [{'n_estimators': estimators}]
 
     # n_components = CS.varianceStudio(data.copy(), pca_threshold)
     # new_data = CS.componentSelection(data.copy(), n_components)
@@ -62,19 +93,3 @@ if __name__ == '__main__':
         # modelName = tl.altsep.join((args["results"],"".join(("Marcos_GM_DTC_",str(clf.best_params_['max_depth']),"_",str(score),".model"))))
         # pickle.dump(clf.best_estimator_, open(modelName, 'wb'))
 
-    for name, model in models:
-        kfold = model_selection.KFold(n_splits=10, random_state=seed)
-        cv_results = model_selection.cross_val_score(model, data, labels, cv=kfold, scoring=score)
-        results.append(cv_results)
-        names.append(name)
-        model_name = tl.altsep.join((args["results"],"".join(("Marcos_GM_", name))))
-        print("Estimator '{}': {:0.3f} for '{}' (+/-{:0.03f})".format(name, cv_results.mean(), score, cv_results.std()))
-
-    # boxplot algorithm comparison
-    fig = plt.figure()
-    fig.suptitle('Algorithm Comparison')
-    ax = fig.add_subplot(111)
-    plt.boxplot(results)
-    ax.set_xticklabels(names)
-    ax.set_ylabel('Accuracy')
-    plt.show()
