@@ -1,5 +1,6 @@
-from os import makedirs, errno, altsep
-from os.path import exists
+from os import makedirs, errno
+from os.path import exists, join
+import numpy as np
 
 def makeDir(path):
     '''
@@ -15,3 +16,12 @@ def makeDir(path):
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+
+def split_train_test(data, test_ratio):
+    shuffled_indices = np.random.permutation(len(data))
+    test_set_size = int(len(data) * test_ratio)
+    test_indices = shuffled_indices[:test_set_size]
+    train_indices = shuffled_indices[test_set_size:]
+    train_set = [data[i] for i in train_indices]
+    test_set  = [data[i] for i in test_indices]
+    return np.asarray(train_set), np.asarray(test_set)

@@ -1,11 +1,7 @@
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import BaggingClassifier, RandomForestClassifier
 import matplotlib.pyplot as plt
 from sklearn import model_selection
-from myPackage import tools as tl
 
-def modelSelection(data, labels, models, seed, score, plot):
+def modelSelection(data, labels, models, seed, score, plot= False):
     results= []
     names = []
     model_results = {}
@@ -16,7 +12,7 @@ def modelSelection(data, labels, models, seed, score, plot):
         results.append(cv_results)
         names.append(name)
         model_results[name] = cv_results.mean()
-        print("Estimator '{}': {:0.3f} for '{}' (+/-{:0.03f})".format(name, cv_results.mean(), score, cv_results.std()))
+        print("Estimator '{}': {:0.4f} for '{}' (+/-{:0.04f})".format(name, cv_results.mean(), score, cv_results.std()))
 
     # boxplot algorithm comparison
     if plot:
@@ -27,8 +23,8 @@ def modelSelection(data, labels, models, seed, score, plot):
         ax.set_xticklabels(names)
         ax.set_ylabel('Accuracy')
         plt.show()
-    model_results = sorted(model_results, key=model_results.__getitem__, reverse=True)
-    print(model_results)
-    print()
 
-    return model_results[0]
+    model_results_sorted = sorted(model_results, key=model_results.__getitem__, reverse=True)
+    print("\nModels ordered by accuracy: \n{}".format(model_results_sorted))
+
+    return [model_results_sorted[0], model_results[model_results_sorted[0]]]
