@@ -2,6 +2,16 @@ import matplotlib.pyplot as plt
 from sklearn import model_selection
 
 def modelSelection(data, labels, models, seed, score, plot= False):
+    '''
+    Compare some models and get the best
+    :param data: training data
+    :param labels: training labels
+    :param models: models to evaluate
+    :param seed: seed for Kfold
+    :param score: evaluation score
+    :param plot: boolean for plot or not
+    :return: name and score of best model
+    '''
     results= []
     names = []
     model_results = {}
@@ -24,6 +34,7 @@ def modelSelection(data, labels, models, seed, score, plot= False):
         ax.set_ylabel('Accuracy')
         plt.show()
 
+    # Sort the models by score
     model_results_sorted = sorted(model_results, key=model_results.__getitem__, reverse=True)
     print("\nModels ordered by accuracy: \n{}".format(model_results_sorted))
 

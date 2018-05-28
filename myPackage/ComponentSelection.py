@@ -1,5 +1,5 @@
 from sklearn.decomposition import PCA
-import numpy as np
+# import numpy as np
 
 def varianceStudio(data, pca_threshold):
     pca = PCA()

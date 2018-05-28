@@ -34,10 +34,17 @@ def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
                           cmap=plt.cm.Greens):
-    """
+    '''
     This function prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
-    """
+    :param cm: confusion matrix
+    :param classes: array of classes' names
+    :param normalize: boolean
+    :param title: plot title
+    :param cmap: colour of matrix background
+    :return: plot confusion matrix
+    '''
+
     # plt_name = altsep.join((plot_path,"".join((title,".png"))))
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
@@ -73,6 +80,11 @@ def plot_confusion_matrix(cm, classes,
 
 
 def normalize(data):
+    '''
+    Normalize input data [0, 1]
+    :param data: input data
+    :return: normalized data
+    '''
     scaler = preprocessing.MinMaxScaler()
     data_min_max = scaler.fit_transform(data)
     return data_min_max

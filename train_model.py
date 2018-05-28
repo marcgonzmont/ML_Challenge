@@ -98,16 +98,12 @@ if __name__ == '__main__':
     models_sorted = sorted(count, key=count.__getitem__, reverse=True)
     model_count = models_sorted[0]
     model_acc = names[0]
-    # print("Best model by count:\n{}\n"
-    #       "Best model by accuracy:\n{}\n\n".format(model_count, model_acc))
 
     best_by_count = names_acc_sorted[names.index(model_count)]
 
     if model_count == model_acc:
-        # print("\nEQUALS!!!")
         model_selected = names_acc_sorted[0]
     else:
-        # print("\nDIFFERENTS!!!")
         if count[model_count] >= int(len(names)*0.6):
             model_selected = best_by_count
         else:
@@ -117,11 +113,8 @@ if __name__ == '__main__':
           "Best model by count:\n{}\n"
           "Model selected:\n{}\n\n".format(names_acc_sorted[0], best_by_count, model_selected))
 
-
-    # models_conf = {}
     if model_selected[0] == 'DCT':
         depth = np.arange(4, max_depth, 1)
-        # depth = np.append(depth, None)
         tuned_parameters = [{'max_depth': depth, 'presort': [False, True]}]
 
     elif model_selected[0] == 'RFC':
@@ -129,20 +122,17 @@ if __name__ == '__main__':
         tuned_parameters = [{'n_estimators': estimators}]
 
     elif model_selected[0] == 'GNB':
-        print("hhh")
-    # model_selected == 'BGG-RFC'
+        tuned_parameters = []
     elif model_selected[0] == 'BGG-DCT' or model_selected[0] == 'BGG-RFC':
-        print("BGG-DCT, BGG-RFC")
         # depth = np.arange(5, max_depth, 5)
         estimators = np.arange(ini_estimators, max_estimators, step_estimators)
-        # tuned_parameters_DCT = [{'max_depth': depth, 'presort': [False, True]}]
         tuned_parameters = [{'n_estimators': estimators}]
 
     elif model_selected[0] == 'BGG-GNB':
         estimators = np.arange(ini_estimators, max_estimators, step_estimators)
         tuned_parameters = [{'n_estimators': estimators}]
 
-    # results = []
+    # GridSearch
     best_estimator = None
     start = time.time()
     for score in scores:
@@ -161,9 +151,11 @@ if __name__ == '__main__':
 
         labels_pred = clf.best_estimator_.predict(val_data)
         print(classification_report(val_labels, labels_pred))
+
         # Compute confusion matrix
         cnf_matrix = confusion_matrix(val_labels, labels_pred)
         tl.np.set_printoptions(precision=3)
+
         # Plot normalized confusion matrix
         tl.plot_confusion_matrix(cnf_matrix, classes=class_names, normalize=True,
                                  title="Normalized confusion matrix for '{}' with '{}' estimator".format(score, model_selected[0]))
